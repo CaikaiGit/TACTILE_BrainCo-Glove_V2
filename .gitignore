@@ -53,3 +53,31 @@ dkms.conf
 
 # debug information files
 *.dwo
+
+# ===== Keil MDK (uVision) build artifacts =====
+*.crf
+*.axf
+*.lnp
+*.dep
+*.lst
+*.htm
+*.iex
+*.bin
+*.uvguix*
+**/MDK/output/
+JLinkLog.txt
+JLinkSettings.ini
+
+# ===== IAR EWARM build artifacts =====
+**/EWARM/settings/
+*.dni
+*.dbgdt
+
+# ===== Toolchain logs =====
+*.log
+*.log.lock
+
+# ===== GCC / custom make build output =====
+build_gcc_check/
+build_right_hand_verify/
+build_left_hand_verify/
