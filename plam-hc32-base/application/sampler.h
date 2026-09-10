@@ -22,7 +22,7 @@
 	#define STRONG_GLOVE_HAND_RIGHT 0U
 #endif
 
-#define FRAME_DATA_BYTES 2U
+#define FRAME_DATA_BYTES 1U
 
 /*
  * Xiaomi-compatible finger payload:

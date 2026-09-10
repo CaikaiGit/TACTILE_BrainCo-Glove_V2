@@ -70,21 +70,33 @@ static const uint8_t m_au8PointMask[SAMPLER_FINGER_COUNT][SAMPLER_MAX_Y_COUNT] =
     { 0x0CU, 0x08U, 0x29U, 0x29U, 0x28U, 0xFFU, 0x3FU, 0x3FU, 0x3FU, 0x00U, 0x00U },
 };
 
-/* Region boundaries follow the clear gaps between pad clusters. */
+/*
+ * Per-finger region maps. Each entry splits the finger's Y grid (8 X-columns by
+ * up to 11 Y-rows) into anatomical zones -- fingertip, middle, root -- that the
+ * Xiaomi-compatible wire format packs as separate
+ * [region-id][point-count][y-count][samples...] blocks.
+ *
+ * Region boundaries follow the clear gaps between pad clusters.
+ */
+
+/* Thumb: two zones only; the two-region wire format reports the root as region ID 2. */
 static const sampler_region_t m_astcThumbRegions[] = {
-    { SAMPLER_REGION_TIP,    0U, 7U },
-    { SAMPLER_REGION_MIDDLE, 7U, 4U },
+    { SAMPLER_REGION_TIP,    0U, 8U }, /* Y0..Y7: fingertip */
+    { SAMPLER_REGION_MIDDLE, 8U, 3U }, /* Y8..Y10: root */
 };
 
+/* Index / middle / ring fingers share the same three-zone layout. */
 static const sampler_region_t m_astcFingerRegions[] = {
-    { SAMPLER_REGION_TIP,    0U, 7U },
-    { SAMPLER_REGION_MIDDLE, 7U, 3U },
-    { SAMPLER_REGION_ROOT,  10U, 1U },
+    { SAMPLER_REGION_TIP,    0U, 7U }, /* Y0..Y6: fingertip */
+    { SAMPLER_REGION_MIDDLE, 7U, 2U }, /* Y7..Y8: middle joint */
+    { SAMPLER_REGION_ROOT,   9U, 2U }, /* Y9..Y10: root */
 };
 
+/* Pinky: 9 rows total, so every zone sits closer to the tip. */
 static const sampler_region_t m_astcPinkyRegions[] = {
-    { SAMPLER_REGION_TIP,    0U, 7U },
-    { SAMPLER_REGION_MIDDLE, 7U, 2U },
+    { SAMPLER_REGION_TIP,    0U, 6U }, /* Y0..Y5: fingertip */
+    { SAMPLER_REGION_MIDDLE, 6U, 1U }, /* Y6: middle joint */
+    { SAMPLER_REGION_ROOT,   7U, 2U }, /* Y7..Y8: root */
 };
 
 static uint8_t m_u8CurrentFinger;

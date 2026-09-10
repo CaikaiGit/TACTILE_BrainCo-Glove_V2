@@ -24,11 +24,11 @@
 
 | 手指 | 指尖 | 指中 | 指根 |
 | --- | --- | --- | --- |
-| 拇指 | Y0–Y6 | Y7–Y10 | 无 |
-| 食指 | Y0–Y6 | Y7–Y9 | Y10 |
-| 中指 | Y0–Y6 | Y7–Y9 | Y10 |
-| 无名指 | Y0–Y6 | Y7–Y9 | Y10 |
-| 小指 | Y0–Y6 | Y7–Y8 | 无 |
+| 拇指 | Y0–Y7 | Y8–Y10（协议区域 ID 2） | 无 |
+| 食指 | Y0–Y6 | Y7–Y8 | Y9–Y10 |
+| 中指 | Y0–Y6 | Y7–Y8 | Y9–Y10 |
+| 无名指 | Y0–Y6 | Y7–Y8 | Y9–Y10 |
+| 小指 | Y0–Y5 | Y6 | Y7–Y8 |
 
 ## 串口上传
 
@@ -43,11 +43,11 @@
 ```text
 byte 0: (part_id << 4) | region_count
 repeat region_count:
-    region_id | valid_count | packed_rows=1 | valid uint16 samples[]
+    region_id | valid_count | bytes_per_point=1 | valid uint8 samples[]
 ```
 
-每点为小端 16 位 ADC/压力值。`part_id` 为：拇指 1、食指 2、中指 3、无名指 4、
+ADC 原始值为 12 位，上传值为 `raw_adc >> 4`，每点占 1 字节。`part_id` 为：拇指 1、食指 2、中指 3、无名指 4、
 小指 5。CRC16 使用多项式 `A001`、初值 `0000`，仅计算 payload。
 
-各指有效点数为 `57+49+49+49+37=241`。五包包含外层协议共 576 字节；串口波特率为
+各指有效点数为 `57+49+49+49+37=241`。五包包含外层协议共 338 字节；串口波特率为
 2 Mbps、8N1。

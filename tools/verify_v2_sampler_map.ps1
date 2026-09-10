@@ -9,6 +9,14 @@ $expectedMasks = @(
     '0x0CU, 0x08U, 0x29U, 0x29U, 0x28U, 0xFFU, 0x3FU, 0x3FU, 0x3FU, 0x00U, 0x00U'
 )
 $expectedPointCounts = @(57, 49, 49, 49, 37)
+$expectedRegionCounts = @(
+    @(33, 24),
+    @(21, 12, 16),
+    @(21, 12, 16),
+    @(21, 12, 16),
+    @(19, 6, 12)
+)
+$expectedPayloadLengths = @(64, 59, 59, 59, 47)
 
 function Get-MaskPointCount([string]$Mask) {
     $count = 0
@@ -40,6 +48,10 @@ foreach ($project in $projects) {
     $source = Get-Content -Raw -LiteralPath $sampler
     $headerText = Get-Content -Raw -LiteralPath $header
 
+    if (-not $headerText.Contains('#define FRAME_DATA_BYTES 1U')) {
+        throw "$project must upload one byte per valid point."
+    }
+
     foreach ($required in @(
         'SAMPLER_MAX_Y_COUNT',
         'm_astcColumnPins',
@@ -70,6 +82,31 @@ foreach ($project in $projects) {
     if ($source -match 'm_astcFingerAdcPins' -or $source -match 'm_au8FingerAdcChannels') {
         throw "$project still contains V1 per-finger ADC tables"
     }
+
+    foreach ($regionDefinition in @(
+        '{ SAMPLER_REGION_TIP,    0U, 8U }',
+        '{ SAMPLER_REGION_MIDDLE, 8U, 3U }',
+        '{ SAMPLER_REGION_TIP,    0U, 7U }',
+        '{ SAMPLER_REGION_MIDDLE, 7U, 2U }',
+        '{ SAMPLER_REGION_ROOT,   9U, 2U }',
+        '{ SAMPLER_REGION_TIP,    0U, 6U }',
+        '{ SAMPLER_REGION_MIDDLE, 6U, 1U }',
+        '{ SAMPLER_REGION_ROOT,   7U, 2U }')) {
+        if (-not $source.Contains($regionDefinition)) {
+            throw "$project missing expected upload region: $regionDefinition"
+        }
+    }
 }
 
-Write-Output 'V2 sampler map contract passed for the unified hand project.'
+for ($finger = 0; $finger -lt $expectedPointCounts.Count; ++$finger) {
+    $regionSum = ($expectedRegionCounts[$finger] | Measure-Object -Sum).Sum
+    if ($regionSum -ne $expectedPointCounts[$finger]) {
+        throw "Finger $($finger + 1) region points do not match its valid-point count."
+    }
+    $payloadLength = 1 + 3 * $expectedRegionCounts[$finger].Count + $regionSum
+    if ($payloadLength -ne $expectedPayloadLengths[$finger]) {
+        throw "Finger $($finger + 1) payload length is incorrect."
+    }
+}
+
+Write-Output 'V2 241-point, one-byte, five-packet upload contract passed.'
