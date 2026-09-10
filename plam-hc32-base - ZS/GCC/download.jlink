@@ -1,6 +1,0 @@
-r
-h
-loadfile ..\Debug\usart_uart_dma.hex
-r
-g
-q

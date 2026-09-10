@@ -1,5 +1,7 @@
 #include "configuration.h"
 
+#include "app_base.h"
+
 #include "calibration.h"
 #include "force_lut_storage.h"
 #include "internal_flash.h"
@@ -67,6 +69,7 @@ void retrieve_chip_id(uint8_t *uid);
 
 static void request_ota_upgrade(void)
 {
+#if (APP_CODE_BASE != 0UL)
     uint32_t u32Primask;
     uint32_t u32Flag = APP_UPGRADE_FLAG;
 
@@ -84,6 +87,7 @@ static void request_ota_upgrade(void)
     if (0U == u32Primask) {
         __enable_irq();
     }
+#endif
 }
 
 static uint16_t force_lut_float_to_u16(float value)

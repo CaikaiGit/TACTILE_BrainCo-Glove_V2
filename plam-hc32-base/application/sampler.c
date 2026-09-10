@@ -17,7 +17,7 @@ typedef struct
     uint8_t y_count;
 } sampler_region_t;
 
-#define SAMPLER_SETTLE_US     (0U)
+#define SAMPLER_SETTLE_US     (5U)
 #define APP_ADC_UNIT          (CM_ADC1)
 #define APP_ADC_SEQ           (ADC_SEQ_A)
 #define APP_ADC_EOC_FLAG      (ADC_FLAG_EOCA)
@@ -29,110 +29,65 @@ typedef struct
 #define SAMPLER_COLUMN_NONE   (0xFFU)
 #define APP_ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
 
-/* THUMB/INDEX/MIDDLE/RING/PINKY RP_AD0, in protocol part order. */
-static const app_pin_t m_astcFingerAdcPins[SAMPLER_FINGER_COUNT] = {
-    { GPIO_PORT_A, GPIO_PIN_01 },
-    { GPIO_PORT_A, GPIO_PIN_02 },
-    { GPIO_PORT_A, GPIO_PIN_03 },
-    { GPIO_PORT_A, GPIO_PIN_04 },
-    { GPIO_PORT_A, GPIO_PIN_05 },
+/* All five analogue switches share AD0, mapped to ADC1_IN0 / PA0. */
+static const app_pin_t m_stcAdcPin = { GPIO_PORT_A, GPIO_PIN_00 };
+
+/* Each V2 finger has its own Y GPIO bank. Unused pinky entries are never read. */
+static const app_pin_t m_astcColumnPins[SAMPLER_FINGER_COUNT][SAMPLER_MAX_Y_COUNT] = {
+    { { GPIO_PORT_A, GPIO_PIN_10 }, { GPIO_PORT_D, GPIO_PIN_11 }, { GPIO_PORT_A, GPIO_PIN_09 }, { GPIO_PORT_D, GPIO_PIN_10 }, { GPIO_PORT_C, GPIO_PIN_09 }, { GPIO_PORT_D, GPIO_PIN_12 }, { GPIO_PORT_C, GPIO_PIN_06 }, { GPIO_PORT_D, GPIO_PIN_13 }, { GPIO_PORT_C, GPIO_PIN_07 }, { GPIO_PORT_D, GPIO_PIN_14 }, { GPIO_PORT_C, GPIO_PIN_08 } },
+    { { GPIO_PORT_E, GPIO_PIN_08 }, { GPIO_PORT_B, GPIO_PIN_10 }, { GPIO_PORT_E, GPIO_PIN_09 }, { GPIO_PORT_E, GPIO_PIN_14 }, { GPIO_PORT_E, GPIO_PIN_10 }, { GPIO_PORT_E, GPIO_PIN_15 }, { GPIO_PORT_E, GPIO_PIN_11 }, { GPIO_PORT_B, GPIO_PIN_12 }, { GPIO_PORT_E, GPIO_PIN_12 }, { GPIO_PORT_B, GPIO_PIN_13 }, { GPIO_PORT_E, GPIO_PIN_13 } },
+    { { GPIO_PORT_A, GPIO_PIN_01 }, { GPIO_PORT_B, GPIO_PIN_02 }, { GPIO_PORT_A, GPIO_PIN_02 }, { GPIO_PORT_E, GPIO_PIN_07 }, { GPIO_PORT_A, GPIO_PIN_04 }, { GPIO_PORT_B, GPIO_PIN_01 }, { GPIO_PORT_A, GPIO_PIN_03 }, { GPIO_PORT_C, GPIO_PIN_05 }, { GPIO_PORT_A, GPIO_PIN_07 }, { GPIO_PORT_B, GPIO_PIN_00 }, { GPIO_PORT_A, GPIO_PIN_06 } },
+    { { GPIO_PORT_E, GPIO_PIN_04 }, { GPIO_PORT_C, GPIO_PIN_00 }, { GPIO_PORT_B, GPIO_PIN_09 }, { GPIO_PORT_C, GPIO_PIN_01 }, { GPIO_PORT_C, GPIO_PIN_13 }, { GPIO_PORT_B, GPIO_PIN_05 }, { GPIO_PORT_E, GPIO_PIN_05 }, { GPIO_PORT_H, GPIO_PIN_02 }, { GPIO_PORT_C, GPIO_PIN_14 }, { GPIO_PORT_C, GPIO_PIN_15 }, { GPIO_PORT_E, GPIO_PIN_06 } },
+    { { GPIO_PORT_C, GPIO_PIN_12 }, { GPIO_PORT_B, GPIO_PIN_08 }, { GPIO_PORT_A, GPIO_PIN_15 }, { GPIO_PORT_D, GPIO_PIN_07 }, { GPIO_PORT_D, GPIO_PIN_01 }, { GPIO_PORT_D, GPIO_PIN_04 }, { GPIO_PORT_B, GPIO_PIN_03 }, { GPIO_PORT_B, GPIO_PIN_04 }, { GPIO_PORT_D, GPIO_PIN_03 }, { 0U, 0U }, { 0U, 0U } },
 };
 
-static const uint8_t m_au8FingerAdcChannels[SAMPLER_FINGER_COUNT] = {
-    ADC_CH1, ADC_CH2, ADC_CH3, ADC_CH4, ADC_CH5,
-};
-
-static const uint16_t m_au16FingerPgaInputs[SAMPLER_FINGER_COUNT] = {
-    ADC_PGA_PIN_ADC1_PA1,
-    ADC_PGA_PIN_ADC1_PA2,
-    ADC_PGA_PIN_ADC1_PA3,
-    ADC_PGA_PIN_ADC1_PA4,
-    ADC_PGA_PIN_ADC1_PA5,
-};
-
-/* Exact Y-number order from the collection-board schematic. */
-static const app_pin_t m_astcColumnPins[SAMPLER_Y_COUNT] = {
-    { GPIO_PORT_B, GPIO_PIN_09 }, /* Y0  */
-    { GPIO_PORT_B, GPIO_PIN_08 }, /* Y1  */
-    { GPIO_PORT_B, GPIO_PIN_06 }, /* Y2  */
-    { GPIO_PORT_B, GPIO_PIN_07 }, /* Y3  */
-    { GPIO_PORT_B, GPIO_PIN_05 }, /* Y4  */
-    { GPIO_PORT_B, GPIO_PIN_04 }, /* Y5  */
-    { GPIO_PORT_A, GPIO_PIN_15 }, /* Y6  */
-    { GPIO_PORT_B, GPIO_PIN_03 }, /* Y7  */
-    { GPIO_PORT_A, GPIO_PIN_10 }, /* Y8  */
-    { GPIO_PORT_A, GPIO_PIN_09 }, /* Y9  */
-    { GPIO_PORT_A, GPIO_PIN_08 }, /* Y10 */
-    { GPIO_PORT_B, GPIO_PIN_15 }, /* Y11 */
-    { GPIO_PORT_B, GPIO_PIN_14 }, /* Y12 */
-    { GPIO_PORT_B, GPIO_PIN_13 }, /* Y13 */
-    { GPIO_PORT_B, GPIO_PIN_12 }, /* Y14 */
-    { GPIO_PORT_B, GPIO_PIN_10 }, /* Y15 */
-};
+static const uint8_t m_au8FingerYCounts[SAMPLER_FINGER_COUNT] = { 11U, 11U, 11U, 11U, 9U };
 
 static const app_pin_t m_astcMuxAddressPins[3U] = {
-    { GPIO_PORT_H, GPIO_PIN_02 }, /* AS_S0 */
-    { GPIO_PORT_C, GPIO_PIN_13 }, /* AS_S1 */
-    { GPIO_PORT_C, GPIO_PIN_14 }, /* AS_S2 */
+    { GPIO_PORT_E, GPIO_PIN_01 }, /* AS_S0 */
+    { GPIO_PORT_D, GPIO_PIN_06 }, /* AS_S1 */
+    { GPIO_PORT_D, GPIO_PIN_09 }, /* AS_S2 */
 };
 
 /* Active-low mux enables, in protocol part order. */
 static const app_pin_t m_astcFingerEnablePins[SAMPLER_FINGER_COUNT] = {
-    { GPIO_PORT_A, GPIO_PIN_06 }, /* THUMB-EN0  */
-    { GPIO_PORT_A, GPIO_PIN_07 }, /* INDEX-EN0  */
-    { GPIO_PORT_B, GPIO_PIN_00 }, /* MIDDLE-EN0 */
-    { GPIO_PORT_B, GPIO_PIN_01 }, /* RING-EN0   */
-    { GPIO_PORT_B, GPIO_PIN_02 }, /* PINKY-EN0  */
+    { GPIO_PORT_D, GPIO_PIN_08 }, /* EN0: thumb  */
+    { GPIO_PORT_C, GPIO_PIN_11 }, /* EN1: index  */
+    { GPIO_PORT_C, GPIO_PIN_04 }, /* EN2: middle */
+    { GPIO_PORT_A, GPIO_PIN_05 }, /* EN3: ring   */
+    { GPIO_PORT_C, GPIO_PIN_03 }, /* EN4: pinky  */
 };
 
 /*
  * One byte per Y line, bit X set when the X/Y crossing is a real sensor pad.
  * These masks come from matching PAD.netName intersections in O02.eprj2.
  */
-static const uint8_t m_au8PointMask[SAMPLER_FINGER_COUNT][SAMPLER_Y_COUNT] = {
-    /* thumb: collection-board Y0..Y12 map to flex-board Y1..Y13 */
-    { 0x0CU, 0x0CU, 0x08U, 0x88U, 0xC9U, 0xFFU, 0xFFU, 0x7EU,
-      0x7EU, 0x7EU, 0x7EU, 0x7EU, 0x7EU, 0x00U, 0x00U, 0x00U },
-#if STRONG_GLOVE_HAND_RIGHT
-    /* right index: 62; X3/Y3 is physically absent */
-    { 0x18U, 0x18U, 0x10U, 0x80U, 0xC9U, 0xFFU, 0xFFU, 0xFCU,
-      0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0x00U, 0x00U, 0x00U },
-#else
-    /* left index: 62; keep the logical X3/Y3 crossing absent for symmetry */
-    { 0x18U, 0x18U, 0x08U, 0x80U, 0xC9U, 0xFFU, 0xFFU, 0xFCU,
-      0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0x00U, 0x00U, 0x00U },
-#endif
-    /* middle: 81 */
-    { 0x0CU, 0x0CU, 0x08U, 0x88U, 0xC9U, 0xFFU, 0xFFU, 0xFCU,
-      0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU },
-    /* ring: 81 */
-    { 0x0CU, 0x0CU, 0x08U, 0x88U, 0xC9U, 0xFFU, 0xFFU, 0xFCU,
-      0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU },
-    /* pinky: 63 */
-    { 0x0CU, 0x0CU, 0x08U, 0x88U, 0xC9U, 0xFFU, 0xFFU, 0xFCU,
-      0xFCU, 0xFCU, 0xFCU, 0xFCU, 0xFCU, 0x00U, 0x00U, 0x00U },
+static const uint8_t m_au8PointMask[SAMPLER_FINGER_COUNT][SAMPLER_MAX_Y_COUNT] = {
+    { 0x18U, 0x18U, 0x91U, 0x91U, 0x11U, 0xD3U, 0xFFU, 0xFFU, 0xFFU, 0xFFU, 0xFFU },
+    { 0x0CU, 0x0CU, 0x08U, 0x49U, 0x49U, 0x48U, 0xFFU, 0x3FU, 0x3FU, 0xFFU, 0xFFU },
+    { 0x0CU, 0x0CU, 0x08U, 0x49U, 0x49U, 0x48U, 0xFFU, 0x3FU, 0x3FU, 0xFFU, 0xFFU },
+    { 0x0CU, 0x0CU, 0x08U, 0x49U, 0x49U, 0x48U, 0xFFU, 0x3FU, 0x3FU, 0xFFU, 0xFFU },
+    { 0x0CU, 0x08U, 0x29U, 0x29U, 0x28U, 0xFFU, 0x3FU, 0x3FU, 0x3FU, 0x00U, 0x00U },
 };
 
 /* Region boundaries follow the clear gaps between pad clusters. */
 static const sampler_region_t m_astcThumbRegions[] = {
     { SAMPLER_REGION_TIP,    0U, 7U },
-    { SAMPLER_REGION_MIDDLE, 7U, 6U },
+    { SAMPLER_REGION_MIDDLE, 7U, 4U },
 };
 
-static const sampler_region_t m_astcShortFingerRegions[] = {
+static const sampler_region_t m_astcFingerRegions[] = {
     { SAMPLER_REGION_TIP,    0U, 7U },
     { SAMPLER_REGION_MIDDLE, 7U, 3U },
-    { SAMPLER_REGION_ROOT,  10U, 3U },
+    { SAMPLER_REGION_ROOT,  10U, 1U },
 };
 
-static const sampler_region_t m_astcLongFingerRegions[] = {
+static const sampler_region_t m_astcPinkyRegions[] = {
     { SAMPLER_REGION_TIP,    0U, 7U },
-    { SAMPLER_REGION_MIDDLE, 7U, 4U },
-    { SAMPLER_REGION_ROOT,  11U, 5U },
+    { SAMPLER_REGION_MIDDLE, 7U, 2U },
 };
 
 static uint8_t m_u8CurrentFinger;
-static uint8_t m_u8PgaAdcFinger;
 static uint8_t m_u8CurrentColumn;
 
 static void sampler_config_output_pin(uint8_t u8Port, uint16_t u16Pin, en_pin_state_t enState)
@@ -160,10 +115,14 @@ static void sampler_write_pin(uint8_t u8Port, uint16_t u16Pin, en_pin_state_t en
 
 static void sampler_set_all_cols(en_pin_state_t enState)
 {
-    uint8_t i;
+    uint8_t finger;
+    uint8_t y;
 
-    for (i = 0U; i < SAMPLER_Y_COUNT; ++i) {
-        sampler_write_pin(m_astcColumnPins[i].u8Port, m_astcColumnPins[i].u16Pin, enState);
+    for (finger = 0U; finger < SAMPLER_FINGER_COUNT; ++finger) {
+        for (y = 0U; y < m_au8FingerYCounts[finger]; ++y) {
+            sampler_write_pin(m_astcColumnPins[finger][y].u8Port,
+                              m_astcColumnPins[finger][y].u16Pin, enState);
+        }
     }
     m_u8CurrentColumn = SAMPLER_COLUMN_NONE;
 }
@@ -178,28 +137,28 @@ static void sampler_set_mux_address(uint8_t u8Address)
     }
 }
 
-static void sampler_select_adc_finger(uint8_t finger)
+static void sampler_select_finger(uint8_t finger)
 {
-    if ((finger >= SAMPLER_FINGER_COUNT) || (finger == m_u8PgaAdcFinger)) {
-        return;
+    uint8_t i;
+
+    for (i = 0U; i < SAMPLER_FINGER_COUNT; ++i) {
+        sampler_write_pin(m_astcFingerEnablePins[i].u8Port,
+                          m_astcFingerEnablePins[i].u16Pin, PIN_STAT_SET);
     }
 
-    ADC_ChCmd(APP_ADC_UNIT, APP_ADC_SEQ,
-              m_au8FingerAdcChannels[m_u8PgaAdcFinger], DISABLE);
-    ADC_ChCmd(APP_ADC_UNIT, APP_ADC_SEQ, m_au8FingerAdcChannels[finger], ENABLE);
-    ADC_PGA_SelectInputSrc(APP_ADC_UNIT, m_au16FingerPgaInputs[finger]);
-    m_u8PgaAdcFinger = finger;
+    m_u8CurrentColumn = SAMPLER_COLUMN_NONE;
+    if (finger < SAMPLER_FINGER_COUNT) {
+        sampler_write_pin(m_astcFingerEnablePins[finger].u8Port,
+                          m_astcFingerEnablePins[finger].u16Pin, PIN_STAT_RST);
+        m_u8CurrentFinger = finger;
+    } else {
+        m_u8CurrentFinger = SAMPLER_FINGER_COUNT;
+    }
 }
 
-static uint16_t sampler_read_adc(uint8_t finger)
+static uint16_t sampler_read_adc(void)
 {
     uint32_t timeout = 0UL;
-
-    if (finger >= SAMPLER_FINGER_COUNT) {
-        return 0U;
-    }
-
-    sampler_select_adc_finger(finger);
 
     ADC_ClearStatus(APP_ADC_UNIT, APP_ADC_EOC_FLAG);
     (void)ADC_Start(APP_ADC_UNIT);
@@ -211,7 +170,7 @@ static uint16_t sampler_read_adc(uint8_t finger)
     }
 
     ADC_ClearStatus(APP_ADC_UNIT, APP_ADC_EOC_FLAG);
-    return ADC_GetValue(APP_ADC_UNIT, m_au8FingerAdcChannels[finger]);
+    return ADC_GetValue(APP_ADC_UNIT, ADC_CH0);
 }
 
 uint8_t sampler_rect_skip_point(uint8_t rect_id, uint8_t x, uint8_t y)
@@ -219,11 +178,14 @@ uint8_t sampler_rect_skip_point(uint8_t rect_id, uint8_t x, uint8_t y)
     uint8_t finger;
 
     if ((rect_id < SAMPLER_RECT_THUMB) || (rect_id > SAMPLER_RECT_PINKY) ||
-        (x >= SAMPLER_X_COUNT) || (y >= SAMPLER_Y_COUNT)) {
+        (x >= SAMPLER_X_COUNT) || (y >= SAMPLER_MAX_Y_COUNT)) {
         return 1U;
     }
 
     finger = (uint8_t)(rect_id - SAMPLER_RECT_THUMB);
+    if (y >= m_au8FingerYCounts[finger]) {
+        return 1U;
+    }
     return ((m_au8PointMask[finger][y] & (uint8_t)(1U << x)) == 0U) ? 1U : 0U;
 }
 
@@ -234,7 +196,7 @@ void sampler_hardware_init(void)
     stc_adc_init_t stcAdcInit;
 
     GPIO_SetDebugPort((GPIO_PIN_TDI | GPIO_PIN_TDO | GPIO_PIN_TRST), DISABLE);
-    GPIO_AnalogCmd(GPIO_PORT_C, GPIO_PIN_14, DISABLE);
+    GPIO_AnalogCmd(GPIO_PORT_C, GPIO_PIN_14 | GPIO_PIN_15, DISABLE);
 
     APP_ADC_FCG_ENABLE();
     (void)ADC_StructInit(&stcAdcInit);
@@ -242,16 +204,13 @@ void sampler_hardware_init(void)
 
     (void)GPIO_StructInit(&stcGpioInit);
     stcGpioInit.u16PinAttr = PIN_ATTR_ANALOG;
-    for (i = 0U; i < SAMPLER_FINGER_COUNT; ++i) {
-        (void)GPIO_Init(m_astcFingerAdcPins[i].u8Port, m_astcFingerAdcPins[i].u16Pin, &stcGpioInit);
-        ADC_SetSampleTime(APP_ADC_UNIT, m_au8FingerAdcChannels[i], 0x20U);
-    }
+    (void)GPIO_Init(m_stcAdcPin.u8Port, m_stcAdcPin.u16Pin, &stcGpioInit);
+    ADC_ChCmd(APP_ADC_UNIT, APP_ADC_SEQ, ADC_CH0, ENABLE);
+    ADC_SetSampleTime(APP_ADC_UNIT, ADC_CH0, 0x20U);
 
     ADC_PGA_Config(APP_ADC_UNIT, APP_ADC_PGA_UNIT, APP_ADC_PGA_GAIN, APP_ADC_PGA_VSS);
-    ADC_PGA_SelectInputSrc(APP_ADC_UNIT, m_au16FingerPgaInputs[0U]);
+    ADC_PGA_SelectInputSrc(APP_ADC_UNIT, ADC_PGA_PIN_ADC1_PA0);
     ADC_PGA_Cmd(APP_ADC_UNIT, APP_ADC_PGA_UNIT, ENABLE);
-    ADC_ChCmd(APP_ADC_UNIT, APP_ADC_SEQ, m_au8FingerAdcChannels[0U], ENABLE);
-    m_u8PgaAdcFinger = 0U;
 
     for (i = 0U; i < APP_ARRAY_SIZE(m_astcMuxAddressPins); ++i) {
         sampler_config_output_pin(m_astcMuxAddressPins[i].u8Port,
@@ -259,45 +218,49 @@ void sampler_hardware_init(void)
     }
     for (i = 0U; i < APP_ARRAY_SIZE(m_astcFingerEnablePins); ++i) {
         sampler_config_output_pin(m_astcFingerEnablePins[i].u8Port,
-                                  m_astcFingerEnablePins[i].u16Pin, PIN_STAT_RST);
+                                  m_astcFingerEnablePins[i].u16Pin, PIN_STAT_SET);
     }
-    for (i = 0U; i < SAMPLER_Y_COUNT; ++i) {
-        sampler_config_output_pin(m_astcColumnPins[i].u8Port,
-                                  m_astcColumnPins[i].u16Pin, PIN_STAT_RST);
+    for (i = 0U; i < SAMPLER_FINGER_COUNT; ++i) {
+        uint8_t y;
+        for (y = 0U; y < m_au8FingerYCounts[i]; ++y) {
+            sampler_config_output_pin(m_astcColumnPins[i][y].u8Port,
+                                      m_astcColumnPins[i][y].u16Pin, PIN_STAT_RST);
+        }
     }
 
     sampler_set_all_cols(PIN_STAT_RST);
-    m_u8CurrentFinger = 0U;
+    m_u8CurrentFinger = SAMPLER_FINGER_COUNT;
 }
 
 void sampler_switch_rows(uint8_t N)
 {
     if (N < SAMPLER_FINGER_COUNT) {
-        sampler_select_adc_finger(N);
-        m_u8CurrentFinger = N;
+        sampler_select_finger(N);
     }
 }
 
 void sampler_switch_cols(uint8_t N)
 {
-    if (N >= SAMPLER_Y_COUNT) {
+    if ((m_u8CurrentFinger >= SAMPLER_FINGER_COUNT) ||
+        (N >= m_au8FingerYCounts[m_u8CurrentFinger])) {
         return;
     }
 
     if (m_u8CurrentColumn == N) {
         return;
     }
-    if (m_u8CurrentColumn < SAMPLER_Y_COUNT) {
-        sampler_write_pin(m_astcColumnPins[m_u8CurrentColumn].u8Port,
-                          m_astcColumnPins[m_u8CurrentColumn].u16Pin, PIN_STAT_RST);
+    if (m_u8CurrentColumn < m_au8FingerYCounts[m_u8CurrentFinger]) {
+        sampler_write_pin(m_astcColumnPins[m_u8CurrentFinger][m_u8CurrentColumn].u8Port,
+                          m_astcColumnPins[m_u8CurrentFinger][m_u8CurrentColumn].u16Pin, PIN_STAT_RST);
     }
-    sampler_write_pin(m_astcColumnPins[N].u8Port, m_astcColumnPins[N].u16Pin, PIN_STAT_SET);
+    sampler_write_pin(m_astcColumnPins[m_u8CurrentFinger][N].u8Port,
+                      m_astcColumnPins[m_u8CurrentFinger][N].u16Pin, PIN_STAT_SET);
     m_u8CurrentColumn = N;
 }
 
 uint16_t sampler_get_value(void)
 {
-    return sampler_read_adc(m_u8CurrentFinger);
+    return (m_u8CurrentFinger < SAMPLER_FINGER_COUNT) ? sampler_read_adc() : 0U;
 }
 
 void sampler_capture_rectangles(sampler_rectangles_t *rects)
@@ -311,10 +274,14 @@ void sampler_capture_rectangles(sampler_rectangles_t *rects)
         return;
     }
 
-    /* Select PGA once per finger; invalid crossings do no GPIO/ADC/delay work. */
+    /* Select exactly one active-low finger enable before scanning its own Y bank. */
     for (finger = 0U; finger < SAMPLER_FINGER_COUNT; ++finger) {
-        sampler_select_adc_finger(finger);
-        for (y = 0U; y < SAMPLER_Y_COUNT; ++y) {
+        sampler_set_all_cols(PIN_STAT_RST);
+        sampler_select_finger(finger);
+#if SAMPLER_SETTLE_US > 0U
+        delay_us(SAMPLER_SETTLE_US);
+#endif
+        for (y = 0U; y < m_au8FingerYCounts[finger]; ++y) {
             point_mask = m_au8PointMask[finger][y];
             if (point_mask == 0U) {
                 for (x = 0U; x < SAMPLER_X_COUNT; ++x) {
@@ -333,12 +300,13 @@ void sampler_capture_rectangles(sampler_rectangles_t *rects)
 #if SAMPLER_SETTLE_US > 0U
                 delay_us(SAMPLER_SETTLE_US);
 #endif
-                rects->finger[finger][y][x] = sampler_read_adc(finger);
+                rects->finger[finger][y][x] = sampler_read_adc();
             }
         }
     }
 
     sampler_set_all_cols(PIN_STAT_RST);
+    sampler_select_finger(SAMPLER_FINGER_COUNT);
 }
 
 uint8_t sampler_get_rect_view(const sampler_rectangles_t *rects, uint8_t rect_id,
@@ -437,14 +405,14 @@ uint16_t sampler_pack_finger_payload(const sampler_rectangles_t *rects, uint8_t 
                                     (uint8_t)APP_ARRAY_SIZE(m_astcThumbRegions),
                                     payload, payload_size);
     case SAMPLER_RECT_INDEX:
-    case SAMPLER_RECT_PINKY:
-        return sampler_pack_regions(rects, rect_id, m_astcShortFingerRegions,
-                                    (uint8_t)APP_ARRAY_SIZE(m_astcShortFingerRegions),
-                                    payload, payload_size);
     case SAMPLER_RECT_MIDDLE:
     case SAMPLER_RECT_RING:
-        return sampler_pack_regions(rects, rect_id, m_astcLongFingerRegions,
-                                    (uint8_t)APP_ARRAY_SIZE(m_astcLongFingerRegions),
+        return sampler_pack_regions(rects, rect_id, m_astcFingerRegions,
+                                    (uint8_t)APP_ARRAY_SIZE(m_astcFingerRegions),
+                                    payload, payload_size);
+    case SAMPLER_RECT_PINKY:
+        return sampler_pack_regions(rects, rect_id, m_astcPinkyRegions,
+                                    (uint8_t)APP_ARRAY_SIZE(m_astcPinkyRegions),
                                     payload, payload_size);
     default:
         return 0U;
@@ -466,13 +434,14 @@ void sampler_get_frame(uint8_t *buffer)
             uint16_t point = ((uint16_t)y * SAMPLER_FINGER_COUNT) + finger;
             uint16_t value = 0U;
 
-            if ((m_au8PointMask[finger][y] & 0x01U) != 0U) {
+            if ((y < m_au8FingerYCounts[finger]) &&
+                ((m_au8PointMask[finger][y] & 0x01U) != 0U)) {
                 sampler_switch_cols(y);
                 sampler_set_mux_address(0U);
 #if SAMPLER_SETTLE_US > 0U
                 delay_us(SAMPLER_SETTLE_US);
 #endif
-                value = sampler_read_adc(finger);
+                value = sampler_read_adc();
             }
 #if FRAME_DATA_BYTES == 1U
             buffer[point] = (uint8_t)(value >> 4U);
@@ -483,6 +452,7 @@ void sampler_get_frame(uint8_t *buffer)
         }
     }
     sampler_set_all_cols(PIN_STAT_RST);
+    sampler_select_finger(SAMPLER_FINGER_COUNT);
 }
 
 void pressure_transform_calibration(uint8_t *in, uint8_t *out,

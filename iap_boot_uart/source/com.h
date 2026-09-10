@@ -46,11 +46,11 @@ extern "C"
 #define MODEM_USART_BAUD_RATE           (2000000UL)
 
 #define MODEM_USART_RX_PORT             (GPIO_PORT_A)
-#define MODEM_USART_RX_PIN              (GPIO_PIN_12)
+#define MODEM_USART_RX_PIN              (GPIO_PIN_11)
 #define MODEM_USART_RX_FUNC             (GPIO_FUNC_33)
 
 #define MODEM_USART_TX_PORT             (GPIO_PORT_A)
-#define MODEM_USART_TX_PIN              (GPIO_PIN_11)
+#define MODEM_USART_TX_PIN              (GPIO_PIN_12)
 #define MODEM_USART_TX_FUNC             (GPIO_FUNC_32)
 
 /*******************************************************************************

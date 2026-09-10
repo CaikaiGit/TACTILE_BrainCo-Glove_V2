@@ -10,20 +10,20 @@
       <TargetName>plam_hc32_base_Debug</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
-          <Device>HC32F460JEUA</Device>
+          <Device>HC32F460PEHB</Device>
           <Vendor>HDSC</Vendor>
-          <PackID>HDSC.HC32F460.1.0.12</PackID>
+          <PackID>HDSC.HC32F460.1.0.11</PackID>
           <PackURL>https://raw.githubusercontent.com/hdscmcu/pack/master/</PackURL>
           <Cpu>IRAM(0x1FFF8000,0x2F000) IRAM2(0x200F0000,0x1000) IROM(0x00000000,0x80000) IROM2(0x03000C00,0x003FC) CPUTYPE("Cortex-M4") FPU2 CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
-          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD1FFF8000 -FC1000 -FN2 -FF0HC32F460_512K -FS00 -FL080000 -FF1HC32F460_otp -FS13000C00 -FL13FC -FP0($$Device:HC32F460JEUA$FlashARM\HC32F460_512K.FLM) -FP1($$Device:HC32F460JEUA$FlashARM\HC32F460_otp.FLM))</FlashDriverDll>
+          <FlashDriverDll>UL2CM3(-S0 -C0 -P0 -FD1FFF8000 -FC1000 -FN2 -FF0HC32F460_512K -FS00 -FL080000 -FF1HC32F460_otp -FS13000C00 -FL13FC -FP0($$Device:HC32F460PEHB$FlashARM\HC32F460_512K.FLM) -FP1($$Device:HC32F460PEHB$FlashARM\HC32F460_otp.FLM))</FlashDriverDll>
           <DeviceId>0</DeviceId>
-          <RegisterFile>$$Device:HC32F460JEUA$Device\Include\HC32F460JEUA.h</RegisterFile>
+          <RegisterFile>$$Device:HC32F460PEHB$Device\Include\HC32F460PEHB.h</RegisterFile>
           <MemoryEnv></MemoryEnv>
           <Cmp></Cmp>
           <Asm></Asm>
@@ -33,7 +33,7 @@
           <SLE66CMisc></SLE66CMisc>
           <SLE66AMisc></SLE66AMisc>
           <SLE66LinkerMisc></SLE66LinkerMisc>
-          <SFDFile>$$Device:HC32F460JEUA$SVD\HC32F460JEUA.svd</SFDFile>
+          <SFDFile>$$Device:HC32F460PEHB$SVD\HC32F460PEHB.svd</SFDFile>
           <bCustSvd>1</bCustSvd>
           <UseEnv>0</UseEnv>
           <BinPath></BinPath>
@@ -138,7 +138,7 @@
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>BIN\UL2CM3.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash3>"" ()</Flash3>
           <Flash4>.\config\debug_init.ini</Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -185,8 +185,6 @@
             <uocXRam>0</uocXRam>
             <RvdsVP>2</RvdsVP>
             <RvdsMve>0</RvdsMve>
-            <RvdsCdeCp>0</RvdsCdeCp>
-            <nBranchProt>0</nBranchProt>
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>1</hadIROM2>
             <StupSel>8</StupSel>
@@ -338,7 +336,7 @@
             <v6Rtti>0</v6Rtti>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>__DEBUG,HC32F460,USE_DDL_DRIVER,APP_CODE_BASE_VALUE=0x0008000</Define>
+              <Define>__DEBUG,HC32F460,USE_DDL_DRIVER,APP_CODE_BASE_VALUE=0x00008000</Define>
               <Undefine></Undefine>
               <IncludePath>../source;../application;../drivers/cmsis/Device/HDSC/hc32f4xx/Include;../drivers/cmsis/Include;../drivers/hc32_ll_driver/inc</IncludePath>
             </VariousControls>
@@ -353,7 +351,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <ClangAsOpt>4</ClangAsOpt>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -572,13 +570,13 @@
       <TargetName>plam_hc32_base_Release</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060020::V5.06 (build 20)::ARMCC</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>HC32F460PETB</Device>
           <Vendor>HDSC</Vendor>
-          <PackID>HDSC.HC32F460.1.0.12</PackID>
+          <PackID>HDSC.HC32F460.1.0.11</PackID>
           <PackURL>https://raw.githubusercontent.com/hdscmcu/pack/master/</PackURL>
           <Cpu>IROM1(0x00000000,0x40000) IROM2(0x03000C00,0x3FC) IRAM1(0x1FFF8000,0x2F000) IRAM2(0x200F0000,0x1000) CPUTYPE("Cortex-M4") FPU2 CLOCK(8000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -747,8 +745,6 @@
             <uocXRam>0</uocXRam>
             <RvdsVP>1</RvdsVP>
             <RvdsMve>0</RvdsMve>
-            <RvdsCdeCp>0</RvdsCdeCp>
-            <nBranchProt>0</nBranchProt>
             <hadIRAM2>1</hadIRAM2>
             <hadIROM2>1</hadIROM2>
             <StupSel>8</StupSel>
@@ -902,7 +898,7 @@
               <MiscControls></MiscControls>
               <Define>HC32F460,USE_DDL_DRIVER,APP_CODE_BASE_VALUE=0x00008000</Define>
               <Undefine></Undefine>
-              <IncludePath>..\source;..\application;..\drivers/cmsis/Device/HDSC/hc32f4xx/Include;..\drivers/cmsis/Include;..\drivers/hc32_ll_driver/inc;</IncludePath>
+              <IncludePath>..\source;..\application;..\drivers/cmsis/Device/HDSC/hc32f4xx/Include;..\drivers/cmsis/Include;..\drivers/hc32_ll_driver/inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -915,7 +911,7 @@
             <NoWarn>0</NoWarn>
             <uSurpInc>0</uSurpInc>
             <useXO>0</useXO>
-            <ClangAsOpt>1</ClangAsOpt>
+            <uClangAs>0</uClangAs>
             <VariousControls>
               <MiscControls></MiscControls>
               <Define></Define>
@@ -1137,14 +1133,5 @@
     <components/>
     <files/>
   </RTE>
-
-  <LayerInfo>
-    <Layers>
-      <Layer>
-        <LayName>usart_uart_dma</LayName>
-        <LayPrjMark>1</LayPrjMark>
-      </Layer>
-    </Layers>
-  </LayerInfo>
 
 </Project>

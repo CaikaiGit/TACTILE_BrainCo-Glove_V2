@@ -93,12 +93,12 @@
 #define RX_POLL_IDLE_TICKS              (2U)
 
 /* USART RX/TX pin definition */
-#define USART_RX_PORT                   (GPIO_PORT_A)   /* PA12: USART1_RX */
-#define USART_RX_PIN                    (GPIO_PIN_12)
+#define USART_RX_PORT                   (GPIO_PORT_A)   /* PA11: USART1_RX */
+#define USART_RX_PIN                    (GPIO_PIN_11)
 #define USART_RX_GPIO_FUNC              (GPIO_FUNC_33)
 
-#define USART_TX_PORT                   (GPIO_PORT_A)   /* PA11: USART1_TX */
-#define USART_TX_PIN                    (GPIO_PIN_11)
+#define USART_TX_PORT                   (GPIO_PORT_A)   /* PA12: USART1_TX */
+#define USART_TX_PIN                    (GPIO_PIN_12)
 #define USART_TX_GPIO_FUNC              (GPIO_FUNC_32)
 
 /* USART unit definition */

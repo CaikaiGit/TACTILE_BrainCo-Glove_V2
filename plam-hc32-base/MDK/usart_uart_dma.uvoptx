@@ -120,12 +120,12 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>UL2CM3</Key>
-          <Name>UL2CM3(-S0 -C0 -P0 ) -FN2 -FC1000 -FD1FFF8000 -FF0HC32F460_512K -FF1HC32F460_otp -FL080000 -FL13FC -FS00 -FS13000C00 -FP0($$Device:HC32F460JEUA$FlashARM\HC32F460_512K.FLM) -FP1($$Device:HC32F460JEUA$FlashARM\HC32F460_otp.FLM)</Name>
+          <Name>UL2CM3(-S0 -C0 -P0 )  -FN2 -FC1000 -FD1FFF8000 -FF0HC32F460_512K -FF1HC32F460_otp -FL080000 -FL13FC -FS00 -FS13000C00 -FP0($$Device:HC32F460PEHB$FlashARM\HC32F460_512K.FLM) -FP1($$Device:HC32F460PEHB$FlashARM\HC32F460_otp.FLM)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
           <Key>JL2CM3</Key>
-          <Name>-U4294967295 -O78 -S2 -ZTIFSpeedSel5000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO15 -FD1FFF8000 -FC1000 -FN2 -FF0HC32F460_512K.FLM -FS00 -FL080000 -FP0($$Device:HC32F460JEUA$FlashARM\HC32F460_512K.FLM) -FF1HC32F460_otp.FLM -FS13000C00 -FL13FC -FP1($$Device:HC32F460JEUA$FlashARM\HC32F460_otp.FLM)</Name>
+          <Name>-U68000009 -O78 -S2 -ZTIFSpeedSel5000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO15 -FD1FFF8000 -FC1000 -FN2 -FF0HC32F460_512K.FLM -FS00 -FL080000 -FP0($$Device:HC32F460PEHB$FlashARM\HC32F460_512K.FLM) -FF1HC32F460_otp.FLM -FS13000C00 -FL13FC -FP1($$Device:HC32F460PEHB$FlashARM\HC32F460_otp.FLM)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -143,7 +143,24 @@
           <Name></Name>
         </SetRegEntry>
       </TargetDriverDllRegistry>
-      <Breakpoint/>
+      <Breakpoint>
+        <Bp>
+          <Number>0</Number>
+          <Type>0</Type>
+          <LineNumber>736</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>31210</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>E:\椤圭洰\寮鸿剳鎵嬪\V2.0\婧愮爜\TACTILE_BrainCo-Glove_V2\plam-hc32-base\source\main.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\plam_hc32_base\../source/main.c\736</Expression>
+        </Bp>
+      </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
@@ -218,10 +235,10 @@
     <TargetOption>
       <CLKADS>8000000</CLKADS>
       <OPTTT>
-        <gFlags>0</gFlags>
+        <gFlags>1</gFlags>
         <BeepAtEnd>1</BeepAtEnd>
-        <RunSim>1</RunSim>
-        <RunTarget>0</RunTarget>
+        <RunSim>0</RunSim>
+        <RunTarget>1</RunTarget>
         <RunAbUc>0</RunAbUc>
       </OPTTT>
       <OPTHX>
@@ -293,7 +310,7 @@
         <bEvRecOn>1</bEvRecOn>
         <bSchkAxf>0</bSchkAxf>
         <bTchkAxf>0</bTchkAxf>
-        <nTsel>6</nTsel>
+        <nTsel>4</nTsel>
         <sDll></sDll>
         <sDllPa></sDllPa>
         <sDlgDll></sDlgDll>
@@ -304,8 +321,20 @@
         <tDlgDll></tDlgDll>
         <tDlgPa></tDlgPa>
         <tIfile></tIfile>
-        <pMon>BIN\CMSIS_AGDI.dll</pMon>
+        <pMon>Segger\JL2CM3.dll</pMon>
       </DebugOpt>
+      <TargetDriverDllRegistry>
+        <SetRegEntry>
+          <Number>0</Number>
+          <Key>JL2CM3</Key>
+          <Name>-U68000009 -O78 -S2 -ZTIFSpeedSel5000 -A0 -C0 -JU1 -JI127.0.0.1 -JP0 -RST0 -N00("ARM CoreSight SW-DP") -D00(2BA01477) -L00(0) -TO18 -TC10000000 -TP21 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -TB1 -TFE0 -FO7 -FD1FFF8000 -FC1000 -FN2 -FF0HC32F460_512K.FLM -FS00 -FL080000 -FP0($$Device:HC32F460PETB$FlashARM\HC32F460_512K.FLM) -FF1HC32F460_otp.FLM -FS13000C00 -FL13FC -FP1($$Device:HC32F460PETB$FlashARM\HC32F460_otp.FLM)</Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
+          <Key>UL2CM3</Key>
+          <Name>UL2CM3(-S0 -C0 -P0 -FD1FFF8000 -FC1000 -FN2 -FF0HC32F460_512K -FS00 -FL080000 -FF1HC32F460_otp -FS13000C00 -FL13FC -FP0($$Device:HC32F460PETB$FlashARM\HC32F460_512K.FLM) -FP1($$Device:HC32F460PETB$FlashARM\HC32F460_otp.FLM))</Name>
+        </SetRegEntry>
+      </TargetDriverDllRegistry>
       <Breakpoint/>
       <Tracepoint>
         <THDelay>0</THDelay>
@@ -349,6 +378,13 @@
       <pszMrulep></pszMrulep>
       <pSingCmdsp></pSingCmdsp>
       <pMultCmdsp></pMultCmdsp>
+      <DebugDescription>
+        <Enable>1</Enable>
+        <EnableFlashSeq>1</EnableFlashSeq>
+        <EnableLog>0</EnableLog>
+        <Protocol>2</Protocol>
+        <DbgClock>1000000</DbgClock>
+      </DebugDescription>
     </TargetOption>
   </Target>
 

@@ -6,17 +6,20 @@
 /*
  * Strong-brain glove topology, taken from O02.eprj2:
  *   - five fingers, each with X0..X7 through an analogue mux;
- *   - Y0..Y15 are shared drive lines;
+ *   - each finger has an independent Y drive bank (Y0..Y10; pinky Y0..Y8);
  *   - one ADC and one active-low mux enable per finger;
  *   - there is no palm sensor on this board.
  */
 #define SAMPLER_X_COUNT       8U
-#define SAMPLER_Y_COUNT       16U
+#define SAMPLER_MAX_Y_COUNT   11U
+#define SAMPLER_Y_COUNT       SAMPLER_MAX_Y_COUNT
 #define SAMPLER_FINGER_COUNT  5U
 
 /* This project currently builds the right glove. 0 remains available for a future left build. */
-#ifndef STRONG_GLOVE_HAND_RIGHT
-#define STRONG_GLOVE_HAND_RIGHT 1U
+#ifdef HAND_RIGHT
+	#define STRONG_GLOVE_HAND_RIGHT 1U
+#else
+	#define STRONG_GLOVE_HAND_RIGHT 0U
 #endif
 
 #define FRAME_DATA_BYTES 2U
@@ -91,7 +94,7 @@ typedef struct {
 } sampler_rect_view_t;
 
 typedef struct {
-    uint16_t finger[SAMPLER_FINGER_COUNT][SAMPLER_Y_COUNT][SAMPLER_X_COUNT];
+    uint16_t finger[SAMPLER_FINGER_COUNT][SAMPLER_MAX_Y_COUNT][SAMPLER_X_COUNT];
 } sampler_rectangles_t;
 
 void sampler_hardware_init(void);
